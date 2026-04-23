@@ -50,7 +50,8 @@ export default function Home() {
     event.preventDefault();
     setIsSubmitting(true);
     
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     if (selectedType) formData.append("projectType", selectedType);
     selectedFeatures.forEach(feature => formData.append("features", feature));
 
@@ -59,7 +60,7 @@ export default function Home() {
     setIsSubmitting(false);
     if (result.success) {
       setIsSuccess(true);
-      event.currentTarget.reset();
+      form.reset();
       setSelectedType(null);
       setSelectedFeatures([]);
       setTimeout(() => setIsSuccess(false), 6000);
