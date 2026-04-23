@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Brief {
+  id               String   @id @default(uuid())
+  companyName      String
+  contactPerson    String
+  email            String
+  phone            String?
+  socialLinks      String?
+  location         String?
+  teamSize         String?
+  fundingStage     String?
+
+  projectType      String
+  projectNiche     String
+  currentWebsite   String?
+  goals            String
+  targetAudience   String
+  competitors      String?
+  designPrefs      String?
+  brandGuidelines  String?
+
+  features         String
+  integrations     String?
+  userRoles        String?
+  contentReady     String?
+  
+  techStack        String?
+  complianceLevel  String?
+  expectedVolume   String?
+
+  budget           String
+  deadline         String
+  maintenance      String?
+  comments         String?
+  
+  status           String   @default("New")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}

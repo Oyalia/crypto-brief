@@ -1,0 +1,28 @@
+-- CreateTable
+CREATE TABLE "Brief" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "companyName" TEXT NOT NULL,
+    "contactPerson" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "phone" TEXT,
+    "socialLinks" TEXT,
+    "projectType" TEXT NOT NULL,
+    "projectNiche" TEXT NOT NULL,
+    "currentWebsite" TEXT,
+    "goals" TEXT NOT NULL,
+    "targetAudience" TEXT NOT NULL,
+    "competitors" TEXT,
+    "designPrefs" TEXT,
+    "brandGuidelines" TEXT,
+    "features" TEXT NOT NULL,
+    "integrations" TEXT,
+    "userRoles" TEXT,
+    "contentReady" TEXT,
+    "budget" TEXT NOT NULL,
+    "deadline" TEXT NOT NULL,
+    "maintenance" TEXT,
+    "comments" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'New',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
