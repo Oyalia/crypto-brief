@@ -1,7 +1,8 @@
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { randomUUID } from "node:crypto";
 
 export const briefs = pgTable("Brief", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
   companyName: text("companyName").notNull(),
   contactPerson: text("contactPerson").notNull(),
   email: text("email").notNull(),
