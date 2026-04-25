@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { briefSchema, type BriefSchema } from "@/lib/validations/brief";
 import { motion, AnimatePresence } from "framer-motion";
 import { submitBrief } from "./actions";
-import { CheckCircle2, Bitcoin, Wallet, ArrowRightLeft, ShieldCheck, LineChart, Landmark, Coins, Search, Zap, LayoutDashboard, Globe, Lock, Users, Loader2 } from "lucide-react";
+import { CheckCircle2, Bitcoin, Wallet, ArrowRightLeft, ShieldCheck, LineChart, Landmark, Coins, Search, Zap, LayoutDashboard, Globe, Lock, Users, Loader2, AlertCircle } from "lucide-react";
 
 // Playful, bouncy animation variants
 const containerVariants = {
@@ -43,38 +46,55 @@ const featureList = [
 export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<BriefSchema>({
+    resolver: zodResolver(briefSchema),
+    defaultValues: {
+      features: [],
+      projectType: "",
+    },
+  });
+
+  const selectedType = watch("projectType");
+  const selectedFeatures = watch("features");
+
+  const onSubmit = async (data: BriefSchema) => {
     setIsSubmitting(true);
     
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    if (selectedType) formData.append("projectType", selectedType);
-    selectedFeatures.forEach(feature => formData.append("features", feature));
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => formData.append(key, v));
+      } else if (value !== null && value !== undefined) {
+        formData.append(key, value);
+      }
+    });
 
     const result = await submitBrief(formData);
     
     setIsSubmitting(false);
     if (result.success) {
       setIsSuccess(true);
-      form.reset();
-      setSelectedType(null);
-      setSelectedFeatures([]);
+      reset();
       setTimeout(() => setIsSuccess(false), 6000);
     } else {
       alert("Oops! Something went wrong. Let's try that again.");
     }
-  }
+  };
 
   const toggleFeature = (featureId: string) => {
-    setSelectedFeatures(prev => 
-      prev.includes(featureId) 
-        ? prev.filter(id => id !== featureId)
-        : [...prev, featureId]
-    );
+    const current = selectedFeatures || [];
+    const next = current.includes(featureId)
+      ? current.filter((id) => id !== featureId)
+      : [...current, featureId];
+    setValue("features", next, { shouldValidate: true });
   };
 
   return (
@@ -166,7 +186,7 @@ export default function Home() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          onSubmit={onSubmit} 
+          onSubmit={handleSubmit(onSubmit)} 
           className="space-y-10"
         >
           {/* Section 1: The Basics */}
@@ -182,34 +202,55 @@ export default function Home() {
                 <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Project / Company Name</label>
                 <motion.input 
                   whileFocus={{ scale: 1.01 }}
-                  type="text" name="companyName" required placeholder="e.g. Nexus Exchange"
-                  className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900" 
+                  type="text" {...register("companyName")} placeholder="e.g. Nexus Exchange"
+                  className={`block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 ${
+                    errors.companyName ? "border-rose-400 focus:border-rose-500" : "border-zinc-200 dark:border-zinc-700 focus:border-indigo-400"
+                  }`}
                 />
+                {errors.companyName && (
+                  <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
+                    <AlertCircle className="w-4 h-4 mr-1" /> {errors.companyName.message}
+                  </p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Lead Contact</label>
                 <motion.input 
                   whileFocus={{ scale: 1.01 }}
-                  type="text" name="contactPerson" required placeholder="Satoshi Nakamoto"
-                  className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900" 
+                  type="text" {...register("contactPerson")} placeholder="Satoshi Nakamoto"
+                  className={`block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 ${
+                    errors.contactPerson ? "border-rose-400 focus:border-rose-500" : "border-zinc-200 dark:border-zinc-700 focus:border-indigo-400"
+                  }`}
                 />
+                {errors.contactPerson && (
+                  <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
+                    <AlertCircle className="w-4 h-4 mr-1" /> {errors.contactPerson.message}
+                  </p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Email Address</label>
                 <motion.input 
                   whileFocus={{ scale: 1.01 }}
-                  type="email" name="email" required placeholder="founder@nexus.com"
-                  className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900" 
+                  type="email" {...register("email")} placeholder="founder@nexus.com"
+                  className={`block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 ${
+                    errors.email ? "border-rose-400 focus:border-rose-500" : "border-zinc-200 dark:border-zinc-700 focus:border-indigo-400"
+                  }`}
                 />
+                {errors.email && (
+                  <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
+                    <AlertCircle className="w-4 h-4 mr-1" /> {errors.email.message}
+                  </p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Telegram / Discord</label>
                 <motion.input 
                   whileFocus={{ scale: 1.01 }}
-                  type="text" name="socialLinks" placeholder="@founder_handle"
+                  type="text" {...register("socialLinks")} placeholder="@founder_handle"
                   className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900" 
                 />
               </div>
@@ -218,7 +259,7 @@ export default function Home() {
                 <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Location / Jurisdiction</label>
                 <motion.input 
                   whileFocus={{ scale: 1.01 }}
-                  type="text" name="location" placeholder="e.g. US, EU, Offshore, Not registered"
+                  type="text" {...register("location")} placeholder="e.g. US, EU, Offshore, Not registered"
                   className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900" 
                 />
               </div>
@@ -226,7 +267,7 @@ export default function Home() {
               <div>
                 <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Current Team Size</label>
                 <div className="relative">
-                  <select name="teamSize"
+                  <select {...register("teamSize")}
                     className="appearance-none block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900 cursor-pointer font-medium">
                     <option value="">Select size...</option>
                     <option value="Just me / Co-founders">Just me / Co-founders</option>
@@ -243,7 +284,7 @@ export default function Home() {
               <div>
                 <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Funding Stage</label>
                 <div className="relative">
-                  <select name="fundingStage"
+                  <select {...register("fundingStage")}
                     className="appearance-none block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-indigo-400 focus:bg-white dark:focus:bg-zinc-900 cursor-pointer font-medium">
                     <option value="">Select stage...</option>
                     <option value="Bootstrapped (Self-funded)">Bootstrapped (Self-funded)</option>
@@ -279,7 +320,7 @@ export default function Home() {
                         whileHover={{ y: -5 }}
                         whileTap={{ scale: 0.95 }}
                         key={type.id} 
-                        onClick={() => setSelectedType(type.id)}
+                        onClick={() => setValue("projectType", type.id, { shouldValidate: true })}
                         className={`cursor-pointer rounded-3xl border-2 p-6 flex flex-col items-center justify-center text-center transition-all duration-300 ${
                           isSelected 
                             ? `border-${type.color.split('-')[1]}-400 ${type.bg} ${type.color} shadow-lg` 
@@ -292,7 +333,11 @@ export default function Home() {
                     );
                   })}
                 </div>
-                <input type="hidden" name="projectType" value={selectedType || ""} required />
+                {errors.projectType && (
+                  <p className="mt-4 text-center text-sm font-bold text-rose-500 flex items-center justify-center">
+                    <AlertCircle className="w-4 h-4 mr-1" /> {errors.projectType.message}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 gap-y-8 gap-x-6 sm:grid-cols-2">
@@ -300,32 +345,53 @@ export default function Home() {
                   <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Target Blockchains & Networks</label>
                   <motion.input 
                     whileFocus={{ scale: 1.01 }}
-                    type="text" name="projectNiche" required placeholder="e.g. Ethereum, Solana, Base, Bitcoin (Lightning)"
-                    className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-cyan-400 focus:bg-white dark:focus:bg-zinc-900" 
+                    type="text" {...register("projectNiche")} placeholder="e.g. Ethereum, Solana, Base, Bitcoin (Lightning)"
+                    className={`block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 ${
+                      errors.projectNiche ? "border-rose-400 focus:border-rose-500" : "border-cyan-200 dark:border-zinc-700 focus:border-cyan-400"
+                    }`}
                   />
+                  {errors.projectNiche && (
+                    <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" /> {errors.projectNiche.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Liquidity & Matching Strategy</label>
                   <motion.textarea 
                     whileFocus={{ scale: 1.01 }}
-                    id="goals" name="goals" rows={3} required placeholder="Are you integrating with external liquidity providers (Binance/Kraken) or using an internal matching engine/AMM?"
-                    className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-cyan-400 focus:bg-white dark:focus:bg-zinc-900 resize-none"></motion.textarea>
+                    {...register("goals")} rows={3} placeholder="Are you integrating with external liquidity providers (Binance/Kraken) or using an internal matching engine/AMM?"
+                    className={`block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 resize-none ${
+                      errors.goals ? "border-rose-400 focus:border-rose-500" : "border-cyan-200 dark:border-zinc-700 focus:border-cyan-400"
+                    }`}></motion.textarea>
+                  {errors.goals && (
+                    <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" /> {errors.goals.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Target Users</label>
                   <motion.textarea 
                     whileFocus={{ scale: 1.01 }}
-                    id="targetAudience" name="targetAudience" rows={3} required placeholder="Retail traders, Institutions, Degen traders?"
-                    className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-cyan-400 focus:bg-white dark:focus:bg-zinc-900 resize-none"></motion.textarea>
+                    {...register("targetAudience")} rows={3} placeholder="Retail traders, Institutions, Degen traders?"
+                    className={`block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 resize-none ${
+                      errors.targetAudience ? "border-rose-400 focus:border-rose-500" : "border-cyan-200 dark:border-zinc-700 focus:border-cyan-400"
+                    }`}></motion.textarea>
+                  {errors.targetAudience && (
+                    <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" /> {errors.targetAudience.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Competitors</label>
                   <motion.textarea 
                     whileFocus={{ scale: 1.01 }}
-                    id="competitors" name="competitors" rows={2} placeholder="e.g. Uniswap, Binance, Coinbase"
+                    {...register("competitors")} rows={2} placeholder="e.g. Uniswap, Binance, Coinbase"
                     className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-cyan-400 focus:bg-white dark:focus:bg-zinc-900 resize-none"></motion.textarea>
                 </div>
                 
@@ -333,7 +399,7 @@ export default function Home() {
                   <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Expected Volume</label>
                   <motion.input 
                     whileFocus={{ scale: 1.01 }}
-                    type="text" name="expectedVolume" placeholder="e.g. 10k users/day, $1M TVL"
+                    type="text" {...register("expectedVolume")} placeholder="e.g. 10k users/day, $1M TVL"
                     className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-cyan-400 focus:bg-white dark:focus:bg-zinc-900" 
                   />
                 </div>
@@ -373,14 +439,21 @@ export default function Home() {
                     )
                   })}
                 </div>
+                {errors.features && (
+                  <p className="mt-4 text-center text-sm font-bold text-rose-500 flex items-center justify-center">
+                    <AlertCircle className="w-4 h-4 mr-1" /> {errors.features.message}
+                  </p>
+                )}
               </div>
               
               <div className="grid grid-cols-1 gap-y-8 gap-x-6 sm:grid-cols-2 pt-4">
                 <div>
                   <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Investment / Budget</label>
                   <div className="relative">
-                    <select name="budget" required
-                      className="appearance-none block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-emerald-400 focus:bg-white dark:focus:bg-zinc-900 cursor-pointer font-medium">
+                    <select {...register("budget")}
+                      className={`appearance-none block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 cursor-pointer font-medium ${
+                        errors.budget ? "border-rose-400 focus:border-rose-500" : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-400"
+                      }`}>
                       <option value="">Select capital range...</option>
                       <option value="&lt; $25,000">Seed (&lt; $25k)</option>
                       <option value="$25,000 - $100,000">MVP ($25k - $100k)</option>
@@ -391,22 +464,36 @@ export default function Home() {
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                   </div>
+                  {errors.budget && (
+                    <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" /> {errors.budget.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Target Mainnet Launch</label>
                   <motion.input 
                     whileFocus={{ scale: 1.01 }}
-                    type="date" name="deadline" required
-                    className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-emerald-400 focus:bg-white dark:focus:bg-zinc-900 font-medium" 
+                    type="date" {...register("deadline")}
+                    className={`block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 font-medium ${
+                      errors.deadline ? "border-rose-400 focus:border-rose-500" : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-400"
+                    }`}
                   />
+                  {errors.deadline && (
+                    <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" /> {errors.deadline.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Regulatory Requirements & Compliance (KYC)</label>
                   <div className="relative">
-                    <select name="complianceLevel" required
-                      className="appearance-none block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-emerald-400 focus:bg-white dark:focus:bg-zinc-900 cursor-pointer font-medium">
+                    <select {...register("complianceLevel")}
+                      className={`appearance-none block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 cursor-pointer font-medium ${
+                        errors.complianceLevel ? "border-rose-400 focus:border-rose-500" : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-400"
+                      }`}>
                       <option value="">Select compliance level...</option>
                       <option value="Full KYC / AML (Regulated)">Full KYC / AML (Regulated)</option>
                       <option value="Light KYC">Light KYC</option>
@@ -416,13 +503,20 @@ export default function Home() {
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                   </div>
+                  {errors.complianceLevel && (
+                    <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" /> {errors.complianceLevel.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Desired Tech Stack</label>
                   <div className="relative">
-                    <select name="techStack" required
-                      className="appearance-none block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-emerald-400 focus:bg-white dark:focus:bg-zinc-900 cursor-pointer font-medium">
+                    <select {...register("techStack")}
+                      className={`appearance-none block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 cursor-pointer font-medium ${
+                        errors.techStack ? "border-rose-400 focus:border-rose-500" : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-400"
+                      }`}>
                       <option value="">Select a stack...</option>
                       <option value="MERN / Node.js">MERN / Node.js</option>
                       <option value="Rust / Go (High Performance)">Rust / Go (High Performance)</option>
@@ -433,13 +527,18 @@ export default function Home() {
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                   </div>
+                  {errors.techStack && (
+                    <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
+                      <AlertCircle className="w-4 h-4 mr-1" /> {errors.techStack.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Final Thoughts</label>
                   <motion.textarea 
                     whileFocus={{ scale: 1.01 }}
-                    name="comments" rows={3} placeholder="Any other spicy details? Or specific licenses?"
+                    {...register("comments")} rows={3} placeholder="Any other spicy details? Or specific licenses?"
                     className="block w-full rounded-2xl border-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:border-emerald-400 focus:bg-white dark:focus:bg-zinc-900 resize-none"></motion.textarea>
                 </div>
               </div>

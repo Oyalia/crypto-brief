@@ -1,5 +1,6 @@
 "use server";
 
+import { briefSchema } from "@/lib/validations/brief";
 import { db } from "@/lib/db";
 import { briefs } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
@@ -7,42 +8,47 @@ import { revalidatePath } from "next/cache";
 
 export async function submitBrief(formData: FormData) {
   try {
-    const features = formData.getAll("features").join(", ");
+    const rawData = {
+      companyName: formData.get("companyName"),
+      contactPerson: formData.get("contactPerson"),
+      email: formData.get("email"),
+      phone: formData.get("phone"),
+      socialLinks: formData.get("socialLinks"),
+      location: formData.get("location"),
+      teamSize: formData.get("teamSize"),
+      fundingStage: formData.get("fundingStage"),
+      projectType: formData.get("projectType"),
+      projectNiche: formData.get("projectNiche"),
+      currentWebsite: formData.get("currentWebsite"),
+      goals: formData.get("goals"),
+      targetAudience: formData.get("targetAudience"),
+      competitors: formData.get("competitors"),
+      designPrefs: formData.get("designPrefs"),
+      brandGuidelines: formData.get("brandGuidelines"),
+      features: formData.getAll("features"),
+      integrations: formData.get("integrations"),
+      userRoles: formData.get("userRoles"),
+      contentReady: formData.get("contentReady"),
+      techStack: formData.get("techStack"),
+      complianceLevel: formData.get("complianceLevel"),
+      expectedVolume: formData.get("expectedVolume"),
+      budget: formData.get("budget"),
+      deadline: formData.get("deadline"),
+      maintenance: formData.get("maintenance"),
+      comments: formData.get("comments"),
+    };
+
+    const validatedData = briefSchema.parse(rawData);
 
     await db.insert(briefs).values({
-      companyName: formData.get("companyName") as string,
-      contactPerson: formData.get("contactPerson") as string,
-      email: formData.get("email") as string,
-      phone: formData.get("phone") as string | null,
-      socialLinks: formData.get("socialLinks") as string | null,
-      location: formData.get("location") as string | null,
-      teamSize: formData.get("teamSize") as string | null,
-      fundingStage: formData.get("fundingStage") as string | null,
-      projectType: formData.get("projectType") as string,
-      projectNiche: formData.get("projectNiche") as string,
-      currentWebsite: formData.get("currentWebsite") as string | null,
-      goals: formData.get("goals") as string,
-      targetAudience: formData.get("targetAudience") as string,
-      competitors: formData.get("competitors") as string | null,
-      designPrefs: formData.get("designPrefs") as string | null,
-      brandGuidelines: formData.get("brandGuidelines") as string | null,
-      features: features,
-      integrations: formData.get("integrations") as string | null,
-      userRoles: formData.get("userRoles") as string | null,
-      contentReady: formData.get("contentReady") as string | null,
-      techStack: formData.get("techStack") as string | null,
-      complianceLevel: formData.get("complianceLevel") as string | null,
-      expectedVolume: formData.get("expectedVolume") as string | null,
-      budget: formData.get("budget") as string,
-      deadline: formData.get("deadline") as string,
-      maintenance: formData.get("maintenance") as string | null,
-      comments: formData.get("comments") as string | null,
+      ...validatedData,
+      features: validatedData.features.join(", "),
     });
 
     return { success: true };
   } catch (error) {
-    console.error("Failed to submit brief:", error);
-    return { success: false, error: "Failed to submit brief" };
+    console.error("Validation or submission failed:", error);
+    return { success: false, error: "Validation failed or database error" };
   }
 }
 
