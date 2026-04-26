@@ -1,0 +1,221 @@
+{
+  "id": "c81caa54-1f26-4a80-b26b-4779731d34fa",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.Brief": {
+      "name": "Brief",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "companyName": {
+          "name": "companyName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contactPerson": {
+          "name": "contactPerson",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "socialLinks": {
+          "name": "socialLinks",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "teamSize": {
+          "name": "teamSize",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fundingStage": {
+          "name": "fundingStage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "projectType": {
+          "name": "projectType",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "projectNiche": {
+          "name": "projectNiche",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "currentWebsite": {
+          "name": "currentWebsite",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "goals": {
+          "name": "goals",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "targetAudience": {
+          "name": "targetAudience",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "competitors": {
+          "name": "competitors",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "designPrefs": {
+          "name": "designPrefs",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "brandGuidelines": {
+          "name": "brandGuidelines",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "features": {
+          "name": "features",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "integrations": {
+          "name": "integrations",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "userRoles": {
+          "name": "userRoles",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contentReady": {
+          "name": "contentReady",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "techStack": {
+          "name": "techStack",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "complianceLevel": {
+          "name": "complianceLevel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expectedVolume": {
+          "name": "expectedVolume",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "budget": {
+          "name": "budget",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "deadline": {
+          "name": "deadline",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "maintenance": {
+          "name": "maintenance",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "comments": {
+          "name": "comments",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'New'"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
