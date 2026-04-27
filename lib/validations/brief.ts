@@ -29,7 +29,7 @@ export const briefSchema = z.object({
   expectedVolume: z.string().optional().nullable(),
 
   budget: z.string().min(1, "Please select your budget range"),
-  deadline: z.string().min(1, "Please select a target launch date"),
+  deadline: z.string().min(1, "Please select a target launch date").regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (year must be 4 digits)"),
   maintenance: z.string().optional().nullable(),
   comments: z.string().optional().nullable(),
 });

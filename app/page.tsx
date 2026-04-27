@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { briefSchema, type BriefSchema } from "@/lib/validations/brief";
 import { motion, AnimatePresence } from "framer-motion";
 import { submitBrief } from "./actions";
-import { CheckCircle2, Bitcoin, Wallet, ArrowRightLeft, ShieldCheck, LineChart, Landmark, Coins, Search, Zap, LayoutDashboard, Globe, Lock, Users, Loader2, AlertCircle } from "lucide-react";
+import { CheckCircle2, Bitcoin, Wallet, ArrowRightLeft, ShieldCheck, LineChart, Landmark, Coins, Search, Zap, LayoutDashboard, Globe, Lock, Users, Loader2, AlertCircle, Calendar } from "lucide-react";
 
 // Playful, bouncy animation variants
 const containerVariants = {
@@ -473,18 +473,25 @@ export default function Home() {
 
                 <div>
                   <label className="block text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-3 ml-2 uppercase tracking-wide">Target Mainnet Launch</label>
+                <div className="relative">
                   <motion.input 
                     whileFocus={{ scale: 1.01 }}
                     type="date" {...register("deadline")}
-                    className={`block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 font-medium ${
+                    min={new Date().toISOString().split('T')[0]}
+                    max="9999-12-31"
+                    className={`block w-full rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-800/80 px-6 py-4 pl-14 text-lg outline-none transition-colors focus:bg-white dark:focus:bg-zinc-900 font-medium ${
                       errors.deadline ? "border-rose-400 focus:border-rose-500" : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-400"
                     }`}
                   />
-                  {errors.deadline && (
-                    <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
-                      <AlertCircle className="w-4 h-4 mr-1" /> {errors.deadline.message}
-                    </p>
-                  )}
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none text-zinc-400">
+                    <Calendar className="w-6 h-6" />
+                  </div>
+                </div>
+                {errors.deadline && (
+                  <p className="mt-2 ml-2 text-sm font-bold text-rose-500 flex items-center">
+                    <AlertCircle className="w-4 h-4 mr-1" /> {errors.deadline.message}
+                  </p>
+                )}
                 </div>
 
                 <div className="sm:col-span-2">
